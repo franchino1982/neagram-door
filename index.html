@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+# Rilancio dopo reset per rigenerare il file HTML
+robust_html = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -41,6 +42,8 @@
       const msg = getLangMessages(langCode);
 
       document.body.innerHTML = `<h2>${msg.loading}</h2>`;
+      console.log("🌐 Lingua rilevata:", langCode);
+      console.log("🔍 Booking ID:", bookingId);
 
       if (!bookingId) {
         document.body.innerHTML = "<h2>❌ Booking number missing</h2>";
@@ -51,34 +54,48 @@
       try {
         const response = await fetch("https://franchino1982.github.io/neagram-door/BookingList.csv");
         const text = await response.text();
-        const lines = text.split('\n');
+        const lines = text.split('\\n');
 
         const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        console.log("📅 Oggi è:", todayStr);
+
         let found = false;
 
         for (const line of lines) {
-          const [id, startRaw, endRaw] = line.split(',');
+          const parts = line.split(',');
+          if (parts.length < 3) continue;
 
-          if (id && id.trim() === bookingId.trim()) {
-            const [d1, m1, y1] = startRaw.trim().split('.');
-            const [d2, m2, y2] = endRaw.trim().split('.');
-            const start = new Date(`${y1}-${m1}-${d1}`);
-            const end = new Date(`${y2}-${m2}-${d2}`);
+          const [id, startRaw, endRaw] = parts.map(v => v.trim());
+          if (!id || !startRaw || !endRaw) continue;
+
+          if (id === bookingId.trim()) {
+            console.log("✅ Prenotazione trovata:", id, startRaw, endRaw);
+
+            const [d1, m1, y1] = startRaw.split('.');
+            const [d2, m2, y2] = endRaw.split('.');
+            const start = new Date(`20${y1}-${m1}-${d1}`);
+            const end = new Date(`20${y2}-${m2}-${d2}`);
+
+            console.log("📆 Check-in:", start.toISOString().split('T')[0]);
+            console.log("📆 Check-out:", end.toISOString().split('T')[0]);
 
             if (today >= start && today <= end) {
               const message = encodeURIComponent(msg.opening);
               const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
 
+              console.log("🚀 Inviando messaggio Telegram:", telegramUrl);
               fetch(telegramUrl)
-                .then(() => console.log("Messaggio inviato"))
-                .catch(error => console.error("Errore invio messaggio:", error));
+                .then(() => console.log("📨 Messaggio inviato con successo"))
+                .catch(error => console.error("❌ Errore invio messaggio:", error));
 
               document.body.innerHTML = `<h2>${msg.opening}</h2>`;
               setTimeout(() => window.close(), 3000);
               found = true;
               break;
             } else {
-              const errorMsg = msg.error.replace("{start}", startRaw.trim()).replace("{end}", endRaw.trim());
+              const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
+              console.log("📛 Prenotazione non valida per oggi");
               document.body.innerHTML = `<h2>${errorMsg}</h2>`;
               setTimeout(() => window.close(), 5000);
               found = true;
@@ -88,13 +105,14 @@
         }
 
         if (!found) {
+          console.log("❌ Nessuna prenotazione trovata per questo ID");
           document.body.innerHTML = `<h2>${msg.notFound}</h2>`;
           setTimeout(() => window.close(), 5000);
         }
 
       } catch (error) {
         document.body.innerHTML = "<h2>⚠️ Errore nel caricamento dati</h2>";
-        console.error(error);
+        console.error("⚠️ Errore fetch CSV:", error);
         setTimeout(() => window.close(), 5000);
       }
     };
@@ -120,3 +138,11 @@
   <h2>⏳ Controllo prenotazione in corso...</h2>
 </body>
 </html>
+"""
+
+# Salvataggio del nuovo index.html aggiornato e robusto
+html_final_path = "/mnt/data/index.html"
+with open(html_final_path, "w", encoding="utf-8") as f:
+    f.write(robust_html)
+
+html_final_path
