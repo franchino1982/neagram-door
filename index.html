@@ -1,5 +1,5 @@
-# Nuova versione robusta con gestione errori sulle date
-safe_html = """<!DOCTYPE html>
+# Versione finale: robusta, sicura e si ferma alla prima prenotazione trovata
+final_html = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -57,11 +57,8 @@ safe_html = """<!DOCTYPE html>
         const lines = text.split('\\n');
 
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        console.log("📅 Oggi è:", todayStr);
-
-        let found = false;
         const cleanedBookingId = bookingId.replace(/[^0-9]/g, '');
+        let found = false;
 
         for (const line of lines) {
           const parts = line.split(',');
@@ -73,17 +70,16 @@ safe_html = """<!DOCTYPE html>
 
           if (id === cleanedBookingId) {
             console.log("✅ Prenotazione trovata:", id, startRaw, endRaw);
+            found = true;
 
             try {
               const [d1, m1, y1] = startRaw.split('.');
               const [d2, m2, y2] = endRaw.split('.');
               const start = new Date(`20${y1}-${m1}-${d1}`);
               const end = new Date(`20${y2}-${m2}-${d2}`);
+              const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-              console.log("📆 Check-in:", start.toISOString().split('T')[0]);
-              console.log("📆 Check-out:", end.toISOString().split('T')[0]);
-
-              if (today >= start && today <= end) {
+              if (todayOnly >= start && todayOnly <= end) {
                 const message = encodeURIComponent(msg.opening);
                 const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
 
@@ -96,17 +92,16 @@ safe_html = """<!DOCTYPE html>
                 setTimeout(() => window.close(), 3000);
               } else {
                 const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
-                console.log("📛 Prenotazione non valida per oggi");
                 document.body.innerHTML = `<h2>${errorMsg}</h2>`;
                 setTimeout(() => window.close(), 5000);
               }
-
-              found = true;
-              break;
-            } catch (dateErr) {
-              console.error("❌ Errore parsing date:", dateErr);
-              continue;
+            } catch (e) {
+              console.error("❌ Errore nel parsing della data:", e);
+              document.body.innerHTML = `<h2>⚠️ Errore nella data della prenotazione</h2>`;
+              setTimeout(() => window.close(), 5000);
             }
+
+            break;
           }
         }
 
@@ -146,9 +141,9 @@ safe_html = """<!DOCTYPE html>
 </html>
 """
 
-# Salvo il file HTML aggiornato
-safe_html_path = "/mnt/data/index.html"
-with open(safe_html_path, "w", encoding="utf-8") as f:
-    f.write(safe_html)
+# Scrive la versione finale del file index.html
+final_path = "/mnt/data/index.html"
+with open(final_path, "w", encoding="utf-8") as f:
+    f.write(final_html)
 
-safe_html_path
+final_path
