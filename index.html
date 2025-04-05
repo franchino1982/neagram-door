@@ -1,5 +1,5 @@
-# HTML aggiornato con confronto flessibile dell'ID (elimina simboli e spazi)
-html_flexible_id = """<!DOCTYPE html>
+# Nuova versione robusta con gestione errori sulle date
+safe_html = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -74,34 +74,38 @@ html_flexible_id = """<!DOCTYPE html>
           if (id === cleanedBookingId) {
             console.log("✅ Prenotazione trovata:", id, startRaw, endRaw);
 
-            const [d1, m1, y1] = startRaw.split('.');
-            const [d2, m2, y2] = endRaw.split('.');
-            const start = new Date(`20${y1}-${m1}-${d1}`);
-            const end = new Date(`20${y2}-${m2}-${d2}`);
+            try {
+              const [d1, m1, y1] = startRaw.split('.');
+              const [d2, m2, y2] = endRaw.split('.');
+              const start = new Date(`20${y1}-${m1}-${d1}`);
+              const end = new Date(`20${y2}-${m2}-${d2}`);
 
-            console.log("📆 Check-in:", start.toISOString().split('T')[0]);
-            console.log("📆 Check-out:", end.toISOString().split('T')[0]);
+              console.log("📆 Check-in:", start.toISOString().split('T')[0]);
+              console.log("📆 Check-out:", end.toISOString().split('T')[0]);
 
-            if (today >= start && today <= end) {
-              const message = encodeURIComponent(msg.opening);
-              const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
+              if (today >= start && today <= end) {
+                const message = encodeURIComponent(msg.opening);
+                const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
 
-              console.log("🚀 Inviando messaggio Telegram:", telegramUrl);
-              fetch(telegramUrl)
-                .then(() => console.log("📨 Messaggio inviato con successo"))
-                .catch(error => console.error("❌ Errore invio messaggio:", error));
+                console.log("🚀 Inviando messaggio Telegram:", telegramUrl);
+                fetch(telegramUrl)
+                  .then(() => console.log("📨 Messaggio inviato con successo"))
+                  .catch(error => console.error("❌ Errore invio messaggio:", error));
 
-              document.body.innerHTML = `<h2>${msg.opening}</h2>`;
-              setTimeout(() => window.close(), 3000);
+                document.body.innerHTML = `<h2>${msg.opening}</h2>`;
+                setTimeout(() => window.close(), 3000);
+              } else {
+                const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
+                console.log("📛 Prenotazione non valida per oggi");
+                document.body.innerHTML = `<h2>${errorMsg}</h2>`;
+                setTimeout(() => window.close(), 5000);
+              }
+
               found = true;
               break;
-            } else {
-              const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
-              console.log("📛 Prenotazione non valida per oggi");
-              document.body.innerHTML = `<h2>${errorMsg}</h2>`;
-              setTimeout(() => window.close(), 5000);
-              found = true;
-              break;
+            } catch (dateErr) {
+              console.error("❌ Errore parsing date:", dateErr);
+              continue;
             }
           }
         }
@@ -142,9 +146,9 @@ html_flexible_id = """<!DOCTYPE html>
 </html>
 """
 
-# Salvataggio del file aggiornato
-html_path_flexible = "/mnt/data/index.html"
-with open(html_path_flexible, "w", encoding="utf-8") as f:
-    f.write(html_flexible_id)
+# Salvo il file HTML aggiornato
+safe_html_path = "/mnt/data/index.html"
+with open(safe_html_path, "w", encoding="utf-8") as f:
+    f.write(safe_html)
 
-html_path_flexible
+safe_html_path
