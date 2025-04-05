@@ -1,5 +1,5 @@
-# Versione finale: robusta, sicura e si ferma alla prima prenotazione trovata
-final_html = """<!DOCTYPE html>
+# Versione finale blindata con controllo isNaN su date
+final_safe_html = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -58,7 +58,6 @@ final_html = """<!DOCTYPE html>
 
         const today = new Date();
         const cleanedBookingId = bookingId.replace(/[^0-9]/g, '');
-        let found = false;
 
         for (const line of lines) {
           const parts = line.split(',');
@@ -70,46 +69,45 @@ final_html = """<!DOCTYPE html>
 
           if (id === cleanedBookingId) {
             console.log("✅ Prenotazione trovata:", id, startRaw, endRaw);
-            found = true;
 
-            try {
-              const [d1, m1, y1] = startRaw.split('.');
-              const [d2, m2, y2] = endRaw.split('.');
-              const start = new Date(`20${y1}-${m1}-${d1}`);
-              const end = new Date(`20${y2}-${m2}-${d2}`);
-              const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const [d1, m1, y1] = startRaw.split('.');
+            const [d2, m2, y2] = endRaw.split('.');
+            const start = new Date(`20${y1}-${m1}-${d1}`);
+            const end = new Date(`20${y2}-${m2}-${d2}`);
 
-              if (todayOnly >= start && todayOnly <= end) {
-                const message = encodeURIComponent(msg.opening);
-                const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
-
-                console.log("🚀 Inviando messaggio Telegram:", telegramUrl);
-                fetch(telegramUrl)
-                  .then(() => console.log("📨 Messaggio inviato con successo"))
-                  .catch(error => console.error("❌ Errore invio messaggio:", error));
-
-                document.body.innerHTML = `<h2>${msg.opening}</h2>`;
-                setTimeout(() => window.close(), 3000);
-              } else {
-                const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
-                document.body.innerHTML = `<h2>${errorMsg}</h2>`;
-                setTimeout(() => window.close(), 5000);
-              }
-            } catch (e) {
-              console.error("❌ Errore nel parsing della data:", e);
-              document.body.innerHTML = `<h2>⚠️ Errore nella data della prenotazione</h2>`;
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+              console.error("❌ Errore parsing data: formato non valido");
+              document.body.innerHTML = "<h2>⚠️ Errore nella data della prenotazione</h2>";
               setTimeout(() => window.close(), 5000);
+              return;
             }
 
-            break;
+            const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            if (todayOnly >= start && todayOnly <= end) {
+              const message = encodeURIComponent(msg.opening);
+              const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
+
+              console.log("🚀 Inviando messaggio Telegram:", telegramUrl);
+              fetch(telegramUrl)
+                .then(() => console.log("📨 Messaggio inviato con successo"))
+                .catch(error => console.error("❌ Errore invio messaggio:", error));
+
+              document.body.innerHTML = `<h2>${msg.opening}</h2>`;
+              setTimeout(() => window.close(), 3000);
+              return;
+            } else {
+              const errorMsg = msg.error.replace("{start}", startRaw).replace("{end}", endRaw);
+              document.body.innerHTML = `<h2>${errorMsg}</h2>`;
+              setTimeout(() => window.close(), 5000);
+              return;
+            }
           }
         }
 
-        if (!found) {
-          console.log("❌ Nessuna prenotazione trovata per questo ID");
-          document.body.innerHTML = `<h2>${msg.notFound}</h2>`;
-          setTimeout(() => window.close(), 5000);
-        }
+        console.log("❌ Nessuna prenotazione trovata per questo ID");
+        document.body.innerHTML = `<h2>${msg.notFound}</h2>`;
+        setTimeout(() => window.close(), 5000);
 
       } catch (error) {
         document.body.innerHTML = "<h2>⚠️ Errore nel caricamento dati</h2>";
@@ -141,9 +139,9 @@ final_html = """<!DOCTYPE html>
 </html>
 """
 
-# Scrive la versione finale del file index.html
-final_path = "/mnt/data/index.html"
-with open(final_path, "w", encoding="utf-8") as f:
+# Salva la versione finale blindata
+final_safe_path = "/mnt/data/index.html"
+with open(final_safe_path, "w", encoding="utf-8") as f:
     f.write(final_html)
 
-final_path
+final_safe_path
