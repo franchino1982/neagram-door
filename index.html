@@ -1,5 +1,5 @@
-# Rilancio dopo reset per rigenerare il file HTML
-robust_html = """<!DOCTYPE html>
+# HTML aggiornato con confronto flessibile dell'ID (elimina simboli e spazi)
+html_flexible_id = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -43,7 +43,7 @@ robust_html = """<!DOCTYPE html>
 
       document.body.innerHTML = `<h2>${msg.loading}</h2>`;
       console.log("🌐 Lingua rilevata:", langCode);
-      console.log("🔍 Booking ID:", bookingId);
+      console.log("🔍 Booking ID ricevuto:", bookingId);
 
       if (!bookingId) {
         document.body.innerHTML = "<h2>❌ Booking number missing</h2>";
@@ -61,15 +61,17 @@ robust_html = """<!DOCTYPE html>
         console.log("📅 Oggi è:", todayStr);
 
         let found = false;
+        const cleanedBookingId = bookingId.replace(/[^0-9]/g, '');
 
         for (const line of lines) {
           const parts = line.split(',');
           if (parts.length < 3) continue;
 
-          const [id, startRaw, endRaw] = parts.map(v => v.trim());
+          const [rawId, startRaw, endRaw] = parts.map(v => v.trim());
+          const id = rawId.replace(/[^0-9]/g, '');
           if (!id || !startRaw || !endRaw) continue;
 
-          if (id === bookingId.trim()) {
+          if (id === cleanedBookingId) {
             console.log("✅ Prenotazione trovata:", id, startRaw, endRaw);
 
             const [d1, m1, y1] = startRaw.split('.');
@@ -140,9 +142,9 @@ robust_html = """<!DOCTYPE html>
 </html>
 """
 
-# Salvataggio del nuovo index.html aggiornato e robusto
-html_final_path = "/mnt/data/index.html"
-with open(html_final_path, "w", encoding="utf-8") as f:
-    f.write(robust_html)
+# Salvataggio del file aggiornato
+html_path_flexible = "/mnt/data/index.html"
+with open(html_path_flexible, "w", encoding="utf-8") as f:
+    f.write(html_flexible_id)
 
-html_final_path
+html_path_flexible
