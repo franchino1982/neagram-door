@@ -7,16 +7,28 @@
     function getLangMessages(lang) {
       const messages = {
         it: {
-          opening: "✅ La porta è aperta!",
-          error: "Caro ospite, la tua prenotazione è dal {start} al {end}.",
-          notFound: "❌ Prenotazione non trovata",
+          opening: "Benvenuto! 🌞 La tua avventura a NeaSpace inizia ora: la porta è aperta, sali al secondo piano, porta destra e recupera le chiavi dalla keybox sulla porta con il codice 0204. Mandaci un messaggino per confermare che siete a casa!",
+          error: "Caro ospite, la tua prenotazione è valida dal {start} al {end}. La porta si aprirà solo in quelle date!",
+          notFound: "Ops! Non riusciamo a trovare la tua prenotazione. Verifica il numero e riprova, oppure contattaci per assistenza (Francesco +971582537673 o +393283887637).",
           loading: "⏳ Controllo prenotazione in corso..."
         },
         en: {
-          opening: "✅ The door is open!",
-          error: "Dear guest, your reservation is from {start} to {end}.",
-          notFound: "❌ Booking not found",
+          opening: "Welcome! 🌞 Your NeaSpace adventure starts now: the door is open, go to the second floor, right door, and collect the keys from the keybox on the door using code 0204. Please send us a message to confirm you've arrived!",
+          error: "Dear guest, your reservation is from {start} to {end}. The door will open only during these dates!",
+          notFound: "Oops! We couldn't find your booking. Please check the number and try again, or contact us for assistance (Francesco +971582537673 or +393283887637).",
           loading: "⏳ Checking your booking..."
+        },
+        fr: {
+          opening: "Bienvenue ! 🌞 Votre aventure NeaSpace commence maintenant : la porte est ouverte, montez au deuxième étage, porte à droite, et récupérez les clés dans la boîte à clés sur la porte avec le code 0204. Merci de nous envoyer un message pour confirmer que vous êtes bien arrivés !",
+          error: "Cher invité, votre réservation est valable du {start} au {end}. La porte ne s'ouvrira que pendant ces dates !",
+          notFound: "Oups ! Nous n'avons pas trouvé votre réservation. Vérifiez le numéro et réessayez, ou contactez-nous pour assistance (Francesco +971582537673 ou +393283887637).",
+          loading: "⏳ Vérification de votre réservation..."
+        },
+        es: {
+          opening: "¡Bienvenido! 🌞 Tu aventura en NeaSpace comienza ahora: la puerta está abierta, sube al segundo piso, puerta a la derecha y recoge las llaves de la caja en la puerta con el código 0204. Envíanos un mensaje para confirmar que has llegado!",
+          error: "Estimado huésped, su reserva es válida del {start} al {end}. ¡La puerta solo se abrirá en esas fechas!",
+          notFound: "¡Ups! No pudimos encontrar su reserva. Verifique el número e inténtelo de nuevo, o contáctenos para obtener ayuda (Francesco +971582537673 o +393283887637).",
+          loading: "⏳ Verificando su reserva..."
         }
       };
       return messages[lang] || messages['en'];
@@ -82,7 +94,7 @@
             const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
             fetch(telegramUrl).catch(console.error);
             document.body.innerHTML = `<h2>${msg.opening}</h2>`;
-            setTimeout(() => window.close(), 3000);
+            setTimeout(() => window.close(), 12000);
             return;
           } else {
             const errorMsg = msg.error.replace("{start}", formatDateString(start)).replace("{end}", formatDateString(end));
@@ -103,8 +115,8 @@
   </script>
   <style>
     body {
-      background-color: #1a1a1a;
-      color: white;
+      background-color: #A2D5F2; /* Blu Pastello */
+      color: #333;
       font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 100px;
@@ -112,6 +124,7 @@
     h2 {
       font-size: 28px;
       margin: 20px;
+      color: #F5B7B1; /* Corallo Soft */
     }
   </style>
 </head>
