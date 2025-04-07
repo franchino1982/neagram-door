@@ -47,7 +47,7 @@
       }
 
       try {
-        const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQYuzkKbQ6Hq8Idu9eZZd6qGzAhwV3QEiQbY8R07JZKffQtwbAkAy1R1fquX-ovFbFcmJcB2SGdBYk/pub?output=csv");
+        const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTuVXZX_f2tzwp9--JCHERAv8eeBKYrGQQz-sR3xNUs9kperUfI_O3-JQ4RIRK1V-o3BuRe8fhKN6NE/pub?output=csv");
         const text = await response.text();
         const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
