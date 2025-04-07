@@ -1,80 +1,74 @@
-# Generazione del nuovo file HTML con filtro più robusto per righe valide e nuovo link al Google Sheet CSV
-html_code = """<!DOCTYPE html>
+# Genera l'HTML aggiornato puntando al nuovo file Google Sheet in CSV
+new_google_csv_url = (
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYuzkKbQ6Hq8Idu9eZtZd6qGzAhwV3QEiQbY8R07JZKffQtwbAkAy1R1fquX-ovFbFcmJcB2SGdBYk/pub?gid=0&single=true&output=csv"
+)
+
+html_code = f"""<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
   <title>Apri Porta - NEASPACE</title>
   <script>
-    function getLangMessages(lang) {
-      const messages = {
-        it: {
+    function getLangMessages(lang) {{
+      const messages = {{
+        it: {{
           opening: "✅ La porta è aperta!",
-          error: "Caro ospite, la tua prenotazione è dal {start} al {end}.",
+          error: "Caro ospite, la tua prenotazione è dal {{start}} al {{end}}.",
           notFound: "❌ Prenotazione non trovata",
           loading: "⏳ Controllo prenotazione in corso..."
-        },
-        fr: {
+        }},
+        fr: {{
           opening: "✅ La porte est ouverte !",
-          error: "Cher invité, votre réservation est du {start} au {end}.",
+          error: "Cher invité, votre réservation est du {{start}} au {{end}}.",
           notFound: "❌ Réservation introuvable",
           loading: "⏳ Vérification de la réservation en cours..."
-        },
-        en: {
+        }},
+        en: {{
           opening: "✅ The door is open!",
-          error: "Dear guest, your reservation is from {start} to {end}.",
+          error: "Dear guest, your reservation is from {{start}} to {{end}}.",
           notFound: "❌ Booking not found",
           loading: "⏳ Checking your booking..."
-        },
-        es: {
+        }},
+        es: {{
           opening: "✅ ¡La puerta está abierta!",
-          error: "Estimado huésped, su reserva es del {start} al {end}.",
+          error: "Estimado huésped, su reserva es del {{start}} al {{end}}.",
           notFound: "❌ Reserva no encontrada",
           loading: "⏳ Verificando su reserva..."
-        }
-      };
+        }}
+      }};
       return messages[lang] || messages['en'];
-    }
+    }}
 
-    function excelDateToJSDate(serial) {
-      const utc_days = Math.floor(serial - 25569);
-      const utc_value = utc_days * 86400;
-      return new Date(utc_value * 1000);
-    }
-
-    function parseDate(raw) {
-      const num = parseFloat(raw);
-      if (!isNaN(num) && num > 30000 && num < 60000) {
-        return excelDateToJSDate(num);
-      }
+    function parseDate(raw) {{
       const [d, m, y] = raw.split('-');
-      if (d && m && y) {
-        return new Date(`${y}-${m}-${d}`);
-      }
+      if (d && m && y) {{
+        return new Date(`${{y}}-${{m}}-${{d}}`);
+      }}
       return new Date('invalid');
-    }
+    }}
 
-    function formatDateString(date) {
+    function formatDateString(date) {{
       const d = date.getDate().toString().padStart(2, '0');
       const m = (date.getMonth() + 1).toString().padStart(2, '0');
       const y = date.getFullYear();
-      return `${d}.${m}.${y}`;
-    }
+      return `${{d}}.${{m}}.${{y}}`;
+    }}
 
-    window.onload = async function () {
+    window.onload = async function () {{
       const urlParams = new URLSearchParams(window.location.search);
       const bookingId = urlParams.get('b');
       const langCode = (navigator.language || 'en').substring(0, 2).toLowerCase();
       const msg = getLangMessages(langCode);
 
-      document.body.innerHTML = `<h2>${msg.loading}</h2>`;
-      if (!bookingId) {
+      document.body.innerHTML = `<h2>${{msg.loading}}</h2>`;
+      if (!bookingId) {{
         document.body.innerHTML = "<h2>❌ Booking number missing</h2>";
         setTimeout(() => window.close(), 5000);
         return;
-      }
+      }}
 
-      try {
-        const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9SHuDDYRG6RPfX9QU5SoI2B35JdNpvERzX3Ao3NSopYlHKYzA4n-6TWJ-wP9r5h7bdNfHpACkOv6X/pub?gid=0&single=true&output=csv");
+      try {{
+        const response = await fetch("{new_google_csv_url}");
         const text = await response.text();
         const lines = text.replace(/\\r/g, '').split('\\n').map(l => l.trim()).filter(l => l && l.includes(','));
 
@@ -82,7 +76,7 @@ html_code = """<!DOCTYPE html>
         const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const cleanedBookingId = bookingId.replace(/[^0-9]/g, '');
 
-        for (const line of lines) {
+        for (const line of lines) {{
           const parts = line.split(',');
           if (parts.length < 3) continue;
 
@@ -93,47 +87,47 @@ html_code = """<!DOCTYPE html>
           const start = parseDate(startRaw);
           const end = parseDate(endRaw);
 
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {{
             document.body.innerHTML = "<h2>⚠️ Errore nella data della prenotazione</h2>";
             setTimeout(() => window.close(), 5000);
             return;
-          }
+          }}
 
-          if (todayOnly >= start && todayOnly <= end) {
+          if (todayOnly >= start && todayOnly <= end) {{
             const message = encodeURIComponent(msg.opening);
             const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=-1002537539305&text=" + message;
             fetch(telegramUrl);
-            document.body.innerHTML = `<h2>${msg.opening}</h2>`;
+            document.body.innerHTML = `<h2>${{msg.opening}}</h2>`;
             setTimeout(() => window.close(), 3000);
             return;
-          } else {
-            const errorMsg = msg.error.replace("{start}", formatDateString(start)).replace("{end}", formatDateString(end));
-            document.body.innerHTML = `<h2>${errorMsg}</h2>`;
+          }} else {{
+            const errorMsg = msg.error.replace("{{start}}", formatDateString(start)).replace("{{end}}", formatDateString(end));
+            document.body.innerHTML = `<h2>${{errorMsg}}</h2>`;
             setTimeout(() => window.close(), 5000);
             return;
-          }
-        }
+          }}
+        }}
 
-        document.body.innerHTML = `<h2>${msg.notFound}</h2>`;
+        document.body.innerHTML = `<h2>${{msg.notFound}}</h2>`;
         setTimeout(() => window.close(), 5000);
-      } catch (error) {
+      }} catch (error) {{
         document.body.innerHTML = "<h2>⚠️ Errore nel caricamento dati</h2>";
         setTimeout(() => window.close(), 5000);
-      }
-    };
+      }}
+    }};
   </script>
   <style>
-    body {
+    body {{
       background-color: #1a1a1a;
       color: white;
       font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 100px;
-    }
-    h2 {
+    }}
+    h2 {{
       font-size: 28px;
       margin: 20px;
-    }
+    }}
   </style>
 </head>
 <body>
@@ -142,8 +136,8 @@ html_code = """<!DOCTYPE html>
 </html>
 """
 
-html_file = "/mnt/data/index_clean_lines_google_csv.html"
-with open(html_file, "w", encoding="utf-8") as f:
+file_path = "/mnt/data/index_google_sheet_final.html"
+with open(file_path, "w", encoding="utf-8") as f:
     f.write(html_code)
 
-html_file
+file_path
