@@ -1,5 +1,5 @@
-# Genero il file HTML aggiornato che usa il formato data "DD-MM-YYYY" (con trattini)
-updated_date_format_html = """<!DOCTYPE html>
+# Creo l'HTML aggiornato per usare il nuovo link CSV di Google Sheets pubblicato
+html_with_new_csv_link = """<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -74,7 +74,7 @@ updated_date_format_html = """<!DOCTYPE html>
       }
 
       try {
-        const response = await fetch("https://docs.google.com/spreadsheets/d/1dZNWXuu7IyqsGve4QHhGcDb-3-P0XvTFNlkjxCQEB_A/export?format=csv");
+        const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTObGkw7t6aeHPcaeOojBaVfx7U59BXjrzoWWHmA4YPDbhhworaUWIdGOTj1ntMZmfaC4DCyutNKs6U/pub?gid=1802636698&single=true&output=csv");
         const text = await response.text();
         const lines = text.replace(/\\r/g, '').split('\\n').slice(1).filter(l => l.trim() !== '');
 
@@ -143,9 +143,9 @@ updated_date_format_html = """<!DOCTYPE html>
 </html>
 """
 
-# Salvo il file HTML aggiornato
-file_path = "/mnt/data/index_dd-mm-yyyy_format.html"
-with open(file_path, "w", encoding="utf-8") as f:
-    f.write(updated_date_format_html)
+# Salvo il file HTML pronto da usare
+html_file_path = "/mnt/data/index_final_google_pub_csv.html"
+with open(html_file_path, "w", encoding="utf-8") as f:
+    f.write(html_with_new_csv_link)
 
-file_path
+html_file_path
