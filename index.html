@@ -44,6 +44,25 @@
       return new Date(utc_value * 1000);
     }
 
+    function parseDate(value) {
+      if (!isNaN(value) && value.trim() !== '') {
+        return excelDateToJSDate(parseFloat(value));
+      }
+      if (value.includes('/')) {
+        const [d, m, y] = value.split('/');
+        return new Date(`${y}-${m}-${d}`);
+      }
+      if (value.includes('-')) {
+        const [d, m, y] = value.split('-');
+        return new Date(`${y}-${m}-${d}`);
+      }
+      if (value.includes('.')) {
+        const [d, m, y] = value.split('.');
+        return new Date(`${y}-${m}-${d}`);
+      }
+      return new Date(value); // fallback
+    }
+
     function formatDateString(date) {
       const d = date.getDate().toString().padStart(2, '0');
       const m = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -78,17 +97,10 @@
           const id = rawId.replace(/[^0-9]/g, '');
           if (id !== cleanedBookingId) continue;
 
-          let start, end;
-
-          if (startRaw.includes('-')) {
-            const [d1, m1, y1] = startRaw.split('-');
-            const [d2, m2, y2] = endRaw.split('-');
-            start = new Date(`${y1}-${m1}-${d1}`);
-            end = new Date(`${y2}-${m2}-${d2}`);
-          } else {
-            start = excelDateToJSDate(parseFloat(startRaw));
-            end = excelDateToJSDate(parseFloat(endRaw));
-          }
+          const start = parseDate(startRaw);
+          const end = parseDate(endRaw);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(0, 0, 0, 0);
 
           if (isNaN(start) || isNaN(end)) {
             document.getElementById("message").innerHTML = "<h2>⚠️ Errore nella data della prenotazione</h2>";
@@ -127,7 +139,7 @@
       margin: 0;
       padding: 0;
       text-align: center;
-      font-size: 26px;
+      font-size: 28px;
     }
     .header {
       background: white;
@@ -141,7 +153,7 @@
       margin-right: 20px;
     }
     .header span {
-      font-size: 44px;
+      font-size: 48px;
       font-weight: bold;
       color: #111;
     }
@@ -149,7 +161,7 @@
       padding: 80px 25px;
     }
     h2 {
-      font-size: 48px;
+      font-size: 52px;
       margin: 30px;
       line-height: 1.6;
     }
