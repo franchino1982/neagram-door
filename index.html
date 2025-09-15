@@ -109,8 +109,8 @@
 
           if (todayOnly >= start && todayOnly <= end) {
             const message = encodeURIComponent(msg.opening);
-            const telegramUrl = "https://api.telegram.org/bot7637183669:AAGtDsA_uiFAgJjLjhXWoV8-GeIlxrfJfsk/sendMessage?chat_id=1001234567890&text=" + message;
-            fetch(telegramUrl).catch(console.error);
+const telegramUrl = `https://api.telegram.org/bot7572198468:AAGO68pKsMw-hu70-qtNYs1K-jjWX_Zj-h4/sendMessage?chat_id=-1002537539305&text=${message}`;
+fetch(telegramUrl).catch(console.error);
             document.getElementById("message").innerHTML = `<h2>${msg.opening}</h2>`;
             setTimeout(() => window.close(), 12000);
             return;
